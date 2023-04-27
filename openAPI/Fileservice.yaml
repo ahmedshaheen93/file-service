@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: file service
+  description: |
+
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080/api/v1'
+    description: localhost server
+tags:
+  - name: files
+paths:
+  /space:
+    post:
+      summary: create a space
+      operationId: createSpace
+      tags:
+        - files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpaceAddRequest'
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceResponse'
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /space/{spaceId}/folder:
+    post:
+      summary: create a folder under space
+      operationId: createFolder
+      tags:
+        - files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderAddRequest'
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderResponse'
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+
+components:
+  schemas:
+
+    SpaceAddRequest:
+      type: object
+      description: |
+        the Space add request
+      allOf:
+        - $ref: '#/components/schemas/Space'
+
+
+    SpaceResponse:
+      type: object
+      description: |
+        the Space response
+      allOf:
+        - type: object
+          properties:
+            id:
+              description: |
+                the Space id
+              type: integer
+        - $ref: '#/components/schemas/Space'
+    Space:
+      type: object
+      description: |
+        the Space model
+      required:
+        - name
+        - permissionGroupId
+      properties:
+        name:
+          description: |
+            the Space Name
+          type: string
+        permissionGroupId:
+          description: |
+            the Permission Group Id
+          type: integer
+
+    FolderAddRequest:
+      type: object
+      description: |
+        the Space add request
+      allOf:
+        - $ref: '#/components/schemas/Space'
+
+    FolderResponse:
+      type: object
+      description: |
+        the Space response
+      allOf:
+        - type: object
+          properties:
+            id:
+              description: |
+                the Space id
+              type: integer
+        - $ref: '#/components/schemas/Folder'
+    Folder:
+      type: object
+      description: |
+        the Folder model
+      required:
+        - name
+      properties:
+        name:
+          description: |
+            the Folder Name
+          type: string
+    ErrorDetails:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        date:
+          type: string
+          format: datetime
+        status:
+          type: string
+        error:
+          type: string
+        uri:
+          type: string
+        message:
+          type: string
