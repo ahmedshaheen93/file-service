@@ -28,6 +28,7 @@ spring:
   # ===============================
   jpa:
     show-sql: true
+    defer-datasource-initialization: true
     # Allows Hibernate to generate SQL optimized for a particular DBMS
     properties:
       hibernate:
@@ -38,6 +39,10 @@ spring:
           CharSet: utf-8
           useUnicode: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       # Naming strategy
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+
+  sql:
+    init:
+      mode: ALWAYS

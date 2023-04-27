@@ -48,6 +48,13 @@ paths:
       operationId: createFolder
       tags:
         - files
+      parameters:
+        - in: path
+          name: spaceId
+          required: true
+          schema:
+            type: integer
+            description: space id
       requestBody:
         required: true
         content:
@@ -104,15 +111,20 @@ components:
         the Space model
       required:
         - name
-        - permissionGroupId
+        - userPermissionId
+        - groupPermissionId
       properties:
         name:
           description: |
             the Space Name
           type: string
-        permissionGroupId:
+        userPermissionId:
           description: |
-            the Permission Group Id
+            the user PermissionId
+          type: integer
+        groupPermissionId:
+          description: |
+            the Group Permission Id
           type: integer
 
     FolderAddRequest:
@@ -120,7 +132,7 @@ components:
       description: |
         the Space add request
       allOf:
-        - $ref: '#/components/schemas/Space'
+        - $ref: '#/components/schemas/Folder'
 
     FolderResponse:
       type: object
@@ -145,6 +157,18 @@ components:
           description: |
             the Folder Name
           type: string
+        parentId:
+          description: |
+            the Folder parent
+          type: integer
+        userPermissionId:
+          description: |
+            the user PermissionId
+          type: integer
+        groupPermissionId:
+          description: |
+            the Group Permission Id
+          type: integer
     ErrorDetails:
       type: object
       required:

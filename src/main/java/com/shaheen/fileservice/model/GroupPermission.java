@@ -4,17 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
-public class PermissionGroup extends AbstractEntity {
+public class GroupPermission extends AbstractEntity {
 
   private String groupName;
-  @OneToMany(mappedBy = "permissionGroup")
+  @OneToMany(mappedBy = "groupPermission")
   private Set<Item> items;
-  @OneToMany(mappedBy = "permissionGroup")
-  private Set<PermissionUser> permissionUsers;
+  @ManyToMany(mappedBy = "groupPermissions")
+  private Set<UserPermission> userPermissions;
 }

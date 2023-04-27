@@ -1,6 +1,8 @@
 package com.shaheen.fileservice.controller;
 
 import com.shaheen.fileservice.api.SpaceApi;
+import com.shaheen.fileservice.api.model.FolderAddRequest;
+import com.shaheen.fileservice.api.model.FolderResponse;
 import com.shaheen.fileservice.api.model.SpaceAddRequest;
 import com.shaheen.fileservice.api.model.SpaceResponse;
 import com.shaheen.fileservice.service.SpaceService;
@@ -17,5 +19,10 @@ public class SpaceController implements SpaceApi {
   @Override
   public ResponseEntity<SpaceResponse> createSpace(SpaceAddRequest spaceAddRequest) {
     return new ResponseEntity<>(spaceService.createSpace(spaceAddRequest), HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<FolderResponse> createFolder(Integer spaceId, FolderAddRequest folderAddRequest) {
+    return new ResponseEntity<>(spaceService.createFolder(spaceId,folderAddRequest), HttpStatus.CREATED);
   }
 }
