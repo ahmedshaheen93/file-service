@@ -1,7 +1,7 @@
 package com.shaheen.fileservice.model;
 
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Set;

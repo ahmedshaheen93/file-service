@@ -1,7 +1,6 @@
 package com.shaheen.fileservice.repository;
 
 import com.shaheen.fileservice.model.File;
-import com.shaheen.fileservice.model.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
