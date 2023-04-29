@@ -5,12 +5,12 @@ info:
 
   version: 1.0.0
 servers:
-  - url: 'http://localhost:8080/api/v1'
+  - url: 'http://localhost:8088/api/v1'
     description: localhost server
 tags:
   - name: files
 paths:
-  /space:
+  /spaces:
     post:
       summary: create a space
       operationId: createSpace
@@ -36,25 +36,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorDetails'
+        404:
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
         500:
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorDetails'
-  /space/{spaceId}/folder:
+  /folders:
     post:
-      summary: create a folder under space
+      summary: create a folder
       operationId: createFolder
       tags:
         - files
-      parameters:
-        - in: path
-          name: spaceId
-          required: true
-          schema:
-            type: integer
-            description: space id
       requestBody:
         required: true
         content:
@@ -71,6 +70,127 @@ paths:
                 $ref: '#/components/schemas/FolderResponse'
         400:
           description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        404:
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /files:
+    post:
+      summary: create a file
+      operationId: createFile
+      tags:
+        - files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileAddRequest'
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileResponse'
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        404:
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /files/{fileId}:
+    get:
+      summary: get a file
+      operationId: getFile
+      tags:
+        - files
+      parameters:
+        - in: path
+          name: fileId
+          required: true
+          schema:
+            type: integer
+            description: file id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileResponse'
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        404:
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+  /files/{fileId}/content:
+    get:
+      summary: download the file content
+      operationId: downloadFile
+      tags:
+        - files
+      parameters:
+        - in: path
+          name: fileId
+          required: true
+          schema:
+            type: integer
+            description: file id
+      responses:
+        200:
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        404:
+          description: not found
           content:
             application/json:
               schema:
@@ -130,20 +250,19 @@ components:
     FolderAddRequest:
       type: object
       description: |
-        the Space add request
+        the folder add request
       allOf:
         - $ref: '#/components/schemas/Folder'
-
     FolderResponse:
       type: object
       description: |
-        the Space response
+        the folder response
       allOf:
         - type: object
           properties:
             id:
               description: |
-                the Space id
+                the file id
               type: integer
         - $ref: '#/components/schemas/Folder'
     Folder:
@@ -152,10 +271,57 @@ components:
         the Folder model
       required:
         - name
+        - parentId
       properties:
         name:
           description: |
             the Folder Name
+          type: string
+        parentId:
+          description: |
+            the Folder parent
+          type: integer
+        userPermissionId:
+          description: |
+            the user PermissionId
+          type: integer
+        groupPermissionId:
+          description: |
+            the Group Permission Id
+          type: integer
+
+    FileAddRequest:
+      type: object
+      description: |
+        the Space add request
+      allOf:
+        - $ref: '#/components/schemas/File'
+    FileResponse:
+      type: object
+      description: |
+        the file response
+      allOf:
+        - type: object
+          properties:
+            id:
+              description: |
+                the file id
+              type: integer
+        - $ref: '#/components/schemas/File'
+    File:
+      type: object
+      description: |
+        the Folder model
+      required:
+        - name
+      properties:
+        name:
+          description: |
+            the File Name
+          type: string
+        content:
+          description: |
+            the File base64 content
           type: string
         parentId:
           description: |

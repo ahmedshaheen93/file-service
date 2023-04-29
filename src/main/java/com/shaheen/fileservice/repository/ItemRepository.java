@@ -5,9 +5,10 @@ import com.shaheen.fileservice.model.Type;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item,Integer> {
-  Optional<Item> findByIdAndType(Integer id, Type type);
+  Optional<Item> findByIdAndTypeIn(Integer id, List<Type> types);
 }

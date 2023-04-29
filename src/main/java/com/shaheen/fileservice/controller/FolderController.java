@@ -1,8 +1,8 @@
 package com.shaheen.fileservice.controller;
 
-import com.shaheen.fileservice.api.SpacesApi;
-import com.shaheen.fileservice.api.model.SpaceAddRequest;
-import com.shaheen.fileservice.api.model.SpaceResponse;
+import com.shaheen.fileservice.api.FoldersApi;
+import com.shaheen.fileservice.api.model.FolderAddRequest;
+import com.shaheen.fileservice.api.model.FolderResponse;
 import com.shaheen.fileservice.service.FileSystemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class SpaceController implements SpacesApi {
+public class FolderController implements FoldersApi {
   private final FileSystemService fileSystemService;
 
   @Override
-  public ResponseEntity<SpaceResponse> createSpace(SpaceAddRequest spaceAddRequest) {
-    return new ResponseEntity<>(fileSystemService.createSpace(spaceAddRequest), HttpStatus.CREATED);
+  public ResponseEntity<FolderResponse> createFolder(FolderAddRequest folderAddRequest) {
+    return new ResponseEntity<>(fileSystemService.createFolder(folderAddRequest), HttpStatus.CREATED);
   }
+
 }
