@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item,Integer> {
+public interface ItemRepository extends JpaRepository<Item, Integer> {
   Optional<Item> findByIdAndTypeIn(Integer id, List<Type> types);
+
+  Optional<Item> findByNameAndParent_IdAndType(String itemName,Integer id, Type type);
+
 }

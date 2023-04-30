@@ -1,6 +1,8 @@
 package com.shaheen.fileservice.service;
 
 import com.shaheen.fileservice.api.model.*;
+import com.shaheen.fileservice.errorhandling.BadRequestException;
+import com.shaheen.fileservice.errorhandling.NotFoundException;
 import com.shaheen.fileservice.model.File;
 import com.shaheen.fileservice.model.*;
 import com.shaheen.fileservice.repository.FileRepository;
@@ -28,16 +30,23 @@ public class FileSystemServiceImpl implements FileSystemService {
   public SpaceResponse createSpace(SpaceAddRequest request) {
     Integer groupPermissionId = request.getGroupPermissionId();
     Integer userPermissionId = request.getUserPermissionId();
-    GroupPermission groupPermission = getGroupPermission(groupPermissionId).orElseThrow(() -> new RuntimeException("not found"));
-    UserPermission userPermission = getUserPermission(userPermissionId).orElseThrow(() -> new RuntimeException("not found"));
+    GroupPermission groupPermission = getGroupPermission(groupPermissionId).orElseThrow(() -> new NotFoundException(String.format("Group Permission with id '%s' was not founded", groupPermissionId)));
+    UserPermission userPermission = getUserPermission(userPermissionId).orElseThrow(() -> new NotFoundException(String.format("User Permission with id '%s' was not founded", userPermissionId)));
     Item item = createItem(request.getName(), null, userPermission, groupPermission, Type.SPACE);
-    return new SpaceResponse().name(item.getName()).id(item.getId()).groupPermissionId(groupPermissionId).userPermissionId(groupPermissionId);
+    return new SpaceResponse()
+        .name(item.getName())
+        .id(item.getId())
+        .groupPermissionId(groupPermissionId)
+        .userPermissionId(groupPermissionId)
+        .location(getItemLocation(item));
   }
 
   @Override
   public FolderResponse createFolder(FolderAddRequest request) {
     Item parent = getParent(request.getParentId(), List.of(Type.SPACE, Type.FOLDER));
-
+    itemRepository.findByNameAndParent_IdAndType(request.getName(), parent.getId(), Type.FOLDER).ifPresent(item -> {
+      throw new BadRequestException(String.format("folder with name '%s' was founded in same dir", request.getName()));
+    });
     Optional<UserPermission> userPermissionOptional = getUserPermission(request.getUserPermissionId());
     Optional<GroupPermission> groupPermissionOptional = getGroupPermission(request.getGroupPermissionId());
     UserPermission userPermission = userPermissionOptional.orElseGet(parent::getUserPermission);
@@ -50,7 +59,8 @@ public class FileSystemServiceImpl implements FileSystemService {
         .name(item.getName())
         .userPermissionId(userPermission.getId())
         .parentId(parent.getId())
-        .groupPermissionId(groupPermission.getId());
+        .groupPermissionId(groupPermission.getId())
+        .location(getItemLocation(item));
   }
 
 
@@ -60,6 +70,10 @@ public class FileSystemServiceImpl implements FileSystemService {
     Item parent = getParent(request.getParentId(), List.of(Type.SPACE, Type.FOLDER));
     GroupPermission groupPermission = getGroupPermission(request.getGroupPermissionId()).orElseGet(parent::getGroupPermission);
     UserPermission userPermission = getUserPermission(request.getUserPermissionId()).orElseGet(parent::getUserPermission);
+    itemRepository.findByNameAndParent_IdAndType(request.getName(), parent.getId(), Type.FILE).ifPresent(item -> {
+      throw new BadRequestException(String.format("File with name '%s' was founded in same folder", request.getName()));
+    });
+
     Item item = createItem(request.getName(), parent, userPermission, groupPermission, Type.FILE);
     File file = new File();
     file.setContent(request.getContent());
@@ -72,12 +86,13 @@ public class FileSystemServiceImpl implements FileSystemService {
         .groupPermissionId(groupPermission.getId())
         .userPermissionId(userPermission.getId())
         .parentId(parent.getId())
-        .content(request.getContent());
+        .content(request.getContent())
+        .location(getItemLocation(item));
   }
 
   @Override
   public FileResponse getFile(Integer fileId) {
-    File file = fileRepository.findById(fileId).orElseThrow(() -> new RuntimeException("not found"));
+    File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException(String.format("File with id '%s' was not founded", fileId)));
     Item item = file.getItem();
     return new FileResponse()
         .id(file.getId())
@@ -85,7 +100,8 @@ public class FileSystemServiceImpl implements FileSystemService {
         .groupPermissionId(item.getGroupPermission().getId())
         .userPermissionId(item.getUserPermission().getId())
         .parentId(item.getParent().getId())
-        .content(file.getContent());
+        .content(file.getContent())
+        .location(getItemLocation(item));
   }
 
   private Item createItem(String itemName, Item parent, UserPermission userPermission, GroupPermission groupPermission, Type type) {
@@ -116,7 +132,15 @@ public class FileSystemServiceImpl implements FileSystemService {
 
   private Item getParent(Integer parentId, List<Type> parentTypes) {
     Optional<Item> optionalParent = itemRepository.findByIdAndTypeIn(parentId, parentTypes);
-    return optionalParent.orElseThrow(() -> new RuntimeException("not found"));
+    return optionalParent.orElseThrow(() -> new NotFoundException(String.format("Parent with id '%s' was not founded", parentId)));
   }
 
+  private String getItemLocation(Item item) {
+    String separator = "/";
+    String root = "/";
+    if (!ObjectUtils.isEmpty(item.getParent())) {
+      root = getItemLocation(item.getParent()) + separator + item.getName();
+    }
+    return root;
+  }
 }

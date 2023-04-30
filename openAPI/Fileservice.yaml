@@ -233,19 +233,8 @@ components:
         - name
         - userPermissionId
         - groupPermissionId
-      properties:
-        name:
-          description: |
-            the Space Name
-          type: string
-        userPermissionId:
-          description: |
-            the user PermissionId
-          type: integer
-        groupPermissionId:
-          description: |
-            the Group Permission Id
-          type: integer
+      allOf:
+        - $ref: '#/components/schemas/MetaData'
 
     FolderAddRequest:
       type: object
@@ -272,28 +261,13 @@ components:
       required:
         - name
         - parentId
-      properties:
-        name:
-          description: |
-            the Folder Name
-          type: string
-        parentId:
-          description: |
-            the Folder parent
-          type: integer
-        userPermissionId:
-          description: |
-            the user PermissionId
-          type: integer
-        groupPermissionId:
-          description: |
-            the Group Permission Id
-          type: integer
+      allOf:
+        - $ref: '#/components/schemas/FileAndFolderMetaData'
 
     FileAddRequest:
       type: object
       description: |
-        the Space add request
+        the file add request
       allOf:
         - $ref: '#/components/schemas/File'
     FileResponse:
@@ -308,25 +282,31 @@ components:
                 the file id
               type: integer
         - $ref: '#/components/schemas/File'
+
     File:
       type: object
       description: |
         the Folder model
       required:
         - name
+        - content
+        - parentId
+      allOf:
+        - type: object
+          properties:
+            content:
+              description: |
+                the File base64 content
+              type: string
+        - $ref: '#/components/schemas/FileAndFolderMetaData'
+
+    MetaData:
+      type: object
       properties:
         name:
           description: |
-            the File Name
+            the Name
           type: string
-        content:
-          description: |
-            the File base64 content
-          type: string
-        parentId:
-          description: |
-            the Folder parent
-          type: integer
         userPermissionId:
           description: |
             the user PermissionId
@@ -335,6 +315,20 @@ components:
           description: |
             the Group Permission Id
           type: integer
+        location:
+          description: |
+            the item location
+          type: string
+    FileAndFolderMetaData:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            parentId:
+              description: |
+                the parent id
+              type: integer
+        - $ref: '#/components/schemas/MetaData'
     ErrorDetails:
       type: object
       required:
