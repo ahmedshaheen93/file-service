@@ -211,6 +211,10 @@ components:
         the Space add request
       allOf:
         - $ref: '#/components/schemas/Space'
+      example:
+        name: stc-assessments
+        userPermissionId: 1
+        groupPermissionId: 1
 
 
     SpaceResponse:
@@ -225,6 +229,16 @@ components:
                 the Space id
               type: integer
         - $ref: '#/components/schemas/Space'
+        - $ref: '#/components/schemas/Links'
+      example:
+        id: 1
+        name: stc-assessments
+        userPermissionId: 1
+        groupPermissionId: 1
+        location: "/"
+        _links:
+          - rel: self
+            href: http://localhost:8088/api/v1/spaces
     Space:
       type: object
       description: |
@@ -242,6 +256,11 @@ components:
         the folder add request
       allOf:
         - $ref: '#/components/schemas/Folder'
+      example:
+        name: backend
+        parentId: 1
+        userPermissionId: 1
+        groupPermissionId: 1
     FolderResponse:
       type: object
       description: |
@@ -254,6 +273,18 @@ components:
                 the file id
               type: integer
         - $ref: '#/components/schemas/Folder'
+        - $ref: '#/components/schemas/Links'
+      example:
+        id: 2
+        parentId: 1
+        name: backend
+        userPermissionId: 1
+        groupPermissionId: 1
+        location: "/backend"
+        _links:
+          - rel: self
+            href: http://localhost:8088/api/v1/folders
+
     Folder:
       type: object
       description: |
@@ -270,6 +301,12 @@ components:
         the file add request
       allOf:
         - $ref: '#/components/schemas/File'
+      example:
+        name: assessment.pdf
+        content: JVBERi0xLjcNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFn...
+        parentId: 2
+        userPermissionId: 1
+        groupPermissionId: 1
     FileResponse:
       type: object
       description: |
@@ -282,6 +319,20 @@ components:
                 the file id
               type: integer
         - $ref: '#/components/schemas/File'
+        - $ref: '#/components/schemas/Links'
+      example:
+        id: 1
+        content: JVBERi0xLjcNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFn...
+        parentId: 2
+        name: assessment.pdf
+        userPermissionId: 1
+        groupPermissionId: 1
+        location: "/backend/assessment.pdf"
+        _links:
+          - rel: self
+            href: http://localhost:8088/api/v1/files
+          - rel: download
+            href: http://localhost:8088/api/v1/files/1/content
 
     File:
       type: object
@@ -329,6 +380,23 @@ components:
                 the parent id
               type: integer
         - $ref: '#/components/schemas/MetaData'
+    Links:
+      type: object
+      properties:
+        _links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+          example: self
+        href:
+          type: string
+
+
     ErrorDetails:
       type: object
       required:

@@ -1,6 +1,9 @@
 package com.shaheen.fileservice.service;
 
 import com.shaheen.fileservice.api.model.*;
+import com.shaheen.fileservice.controller.FileController;
+import com.shaheen.fileservice.controller.FolderController;
+import com.shaheen.fileservice.controller.SpaceController;
 import com.shaheen.fileservice.errorhandling.BadRequestException;
 import com.shaheen.fileservice.errorhandling.NotFoundException;
 import com.shaheen.fileservice.model.File;
@@ -16,6 +19,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +44,8 @@ public class FileSystemServiceImpl implements FileSystemService {
         .id(item.getId())
         .groupPermissionId(groupPermissionId)
         .userPermissionId(groupPermissionId)
-        .location(getItemLocation(item));
+        .location(getItemLocation(item))
+        .links(generateSpaceLinks(request));
   }
 
   @Override
@@ -60,8 +67,10 @@ public class FileSystemServiceImpl implements FileSystemService {
         .userPermissionId(userPermission.getId())
         .parentId(parent.getId())
         .groupPermissionId(groupPermission.getId())
-        .location(getItemLocation(item));
+        .location(getItemLocation(item))
+        .links(generateFolderLinks(request));
   }
+
 
 
   @Override
@@ -87,7 +96,8 @@ public class FileSystemServiceImpl implements FileSystemService {
         .userPermissionId(userPermission.getId())
         .parentId(parent.getId())
         .content(request.getContent())
-        .location(getItemLocation(item));
+        .location(getItemLocation(item))
+        .links(generateFileLinks(request,file.getId()));
   }
 
   @Override
@@ -139,8 +149,35 @@ public class FileSystemServiceImpl implements FileSystemService {
     String separator = "/";
     String root = "/";
     if (!ObjectUtils.isEmpty(item.getParent())) {
-      root = getItemLocation(item.getParent()) + separator + item.getName();
+      String parentLocation = getItemLocation(item.getParent());
+      root =  (parentLocation.endsWith(separator) ? parentLocation.substring(0, parentLocation.length() - 1) : parentLocation) + separator + item.getName();
     }
     return root;
   }
+  private List<Link> generateSpaceLinks(SpaceAddRequest request) {
+    org.springframework.hateoas.Link link = linkTo(methodOn(SpaceController.class)
+        .createSpace(request)).withSelfRel();
+    String href = link.getHref();
+    Link self = new Link().rel("self").href(href);
+    return List.of(self);
+  }
+  private List<Link> generateFolderLinks(FolderAddRequest request) {
+    org.springframework.hateoas.Link link = linkTo(methodOn(FolderController.class)
+        .createFolder(request)).withSelfRel();
+    String href = link.getHref();
+    Link self = new Link().rel("self").href(href);
+    return List.of(self);
+  }
+  private List<Link> generateFileLinks(FileAddRequest request,Integer fileId) {
+    org.springframework.hateoas.Link selfLink = linkTo(methodOn(FileController.class)
+        .createFile(request)).withSelfRel();
+    org.springframework.hateoas.Link contentLink = linkTo(methodOn(FileController.class)
+        .downloadFile(fileId)).withRel("download");
+    String contentHref = contentLink.getHref();
+    String selfHref = selfLink.getHref();
+    Link self = new Link().rel("self").href(selfHref);
+    Link download = new Link().rel("download").href(contentHref);
+    return List.of(self,download);
+  }
+
 }
