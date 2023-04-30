@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: file service
   description: |
-
+    file system that managing upload/download files
   version: 1.0.0
 servers:
   - url: 'http://localhost:8088/api/v1'
