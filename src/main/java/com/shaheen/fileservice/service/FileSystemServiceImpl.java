@@ -72,7 +72,6 @@ public class FileSystemServiceImpl implements FileSystemService {
   }
 
 
-
   @Override
   @Transactional
   public FileResponse createFile(FileAddRequest request) {
@@ -97,7 +96,7 @@ public class FileSystemServiceImpl implements FileSystemService {
         .parentId(parent.getId())
         .content(request.getContent())
         .location(getItemLocation(item))
-        .links(generateFileLinks(request,file.getId()));
+        .links(generateFileLinks(request, file.getId()));
   }
 
   @Override
@@ -147,13 +146,16 @@ public class FileSystemServiceImpl implements FileSystemService {
 
   private String getItemLocation(Item item) {
     String separator = "/";
-    String root = "/";
+    String location = "/";
     if (!ObjectUtils.isEmpty(item.getParent())) {
       String parentLocation = getItemLocation(item.getParent());
-      root =  (parentLocation.endsWith(separator) ? parentLocation.substring(0, parentLocation.length() - 1) : parentLocation) + separator + item.getName();
+      location = parentLocation + separator + item.getName();
+    } else {
+      location = location + item.getName();
     }
-    return root;
+    return location;
   }
+
   private List<Link> generateSpaceLinks(SpaceAddRequest request) {
     org.springframework.hateoas.Link link = linkTo(methodOn(SpaceController.class)
         .createSpace(request)).withSelfRel();
@@ -161,6 +163,7 @@ public class FileSystemServiceImpl implements FileSystemService {
     Link self = new Link().rel("self").href(href);
     return List.of(self);
   }
+
   private List<Link> generateFolderLinks(FolderAddRequest request) {
     org.springframework.hateoas.Link link = linkTo(methodOn(FolderController.class)
         .createFolder(request)).withSelfRel();
@@ -168,7 +171,8 @@ public class FileSystemServiceImpl implements FileSystemService {
     Link self = new Link().rel("self").href(href);
     return List.of(self);
   }
-  private List<Link> generateFileLinks(FileAddRequest request,Integer fileId) {
+
+  private List<Link> generateFileLinks(FileAddRequest request, Integer fileId) {
     org.springframework.hateoas.Link selfLink = linkTo(methodOn(FileController.class)
         .createFile(request)).withSelfRel();
     org.springframework.hateoas.Link contentLink = linkTo(methodOn(FileController.class)
@@ -177,7 +181,7 @@ public class FileSystemServiceImpl implements FileSystemService {
     String selfHref = selfLink.getHref();
     Link self = new Link().rel("self").href(selfHref);
     Link download = new Link().rel("download").href(contentHref);
-    return List.of(self,download);
+    return List.of(self, download);
   }
 
 }
